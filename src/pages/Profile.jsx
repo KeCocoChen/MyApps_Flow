@@ -2,14 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProfileHeader from '../components/ProfileHeader';
 import LivingTagBadge from '../components/LivingTagBadge';
-import { Grid3X3, Tag, Home, History, Eye, EyeOff, MessageCircle, DoorOpen, UserPlus, Share2, Camera } from 'lucide-react';
+import { History, Eye, EyeOff, MessageCircle, DoorOpen, UserPlus, Share2, Camera, Mail, Plus } from 'lucide-react';
 import AvatarWalker from '../components/AvatarWalker';
 import { useRef } from 'react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function Profile() {
-  const [tab, setTab] = useState('virtual_home');
   const [historyVisible, setHistoryVisible] = useState(false);
   const [bgPhoto, setBgPhoto] = useState('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900');
   const fileInputRef = useRef(null);
@@ -44,8 +43,33 @@ export default function Profile() {
   const myProfile = profiles[0];
   const myPosts = posts.slice(0, 9);
   const myTags = allTags.filter(t => t.profile_username === myProfile?.username);
-  const customTags = myTags.filter(t => t.tag_type === 'custom');
-  const officialTags = myTags.filter(t => t.tag_type === 'official');
+
+  const storyTags = [
+    {
+      id: 'virtual_home',
+      label: 'Home',
+      preview: bgPhoto,
+      type: 'image',
+    },
+    {
+      id: 'music',
+      label: 'Music',
+      emoji: '🎵',
+      sublabel: 'Blinding Lights',
+    },
+    {
+      id: 'movie',
+      label: 'Movie',
+      emoji: '🎬',
+      sublabel: 'Interstellar',
+    },
+    {
+      id: 'custom',
+      label: 'Gaming',
+      emoji: '🎮',
+      sublabel: 'Valorant',
+    },
+  ];
 
   const handleTagClick = (tag) => {
     if (tag.action_type === 'location_discover') toast.info(`Discovering people in ${tag.value || tag.label}`);
@@ -55,85 +79,85 @@ export default function Profile() {
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="sticky top-0 bg-background/95 backdrop-blur-lg z-10 border-b border-border px-4 py-3">
-        <h1 className="text-lg font-bold font-heading text-center">{myProfile?.username || 'My Profile'}</h1>
-      </div>
-
-      <ProfileHeader profile={myProfile} isOwn />
-
-      {myTags.length > 0 && (
-        <div className="px-4 py-2 flex flex-wrap gap-2">
-          {myTags.map(tag => <LivingTagBadge key={tag.id} tag={tag} onClick={handleTagClick} />)}
-        </div>
-      )}
-
-      <div className="flex border-b border-border mt-2">
-        <button onClick={() => setTab('virtual_home')}
-                className={`flex-1 py-3 flex justify-center transition-colors ${tab === 'virtual_home' ? 'border-b-2 border-foreground' : 'text-muted-foreground'}`}>
-          <Home className="h-5 w-5" />
+      {/* Header with transparent home background */}
+      <div className="relative overflow-hidden">
+        {/* Very transparent home bg */}
+        <img
+          src={bgPhoto}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none"
+        />
+        {/* Camera button */}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="absolute top-3 right-3 z-10 bg-black/20 hover:bg-black/40 text-white rounded-full p-1.5 transition-colors"
+        >
+          <Camera className="h-3.5 w-3.5" />
         </button>
-        <button onClick={() => setTab('posts')}
-                className={`flex-1 py-3 flex justify-center transition-colors ${tab === 'posts' ? 'border-b-2 border-foreground' : 'text-muted-foreground'}`}>
-          <Grid3X3 className="h-5 w-5" />
-        </button>
-        <button onClick={() => setTab('tags')}
-                className={`flex-1 py-3 flex justify-center transition-colors ${tab === 'tags' ? 'border-b-2 border-foreground' : 'text-muted-foreground'}`}>
-          <Tag className="h-5 w-5" />
-        </button>
-      </div>
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleBgUpload} />
 
-      {tab === 'virtual_home' ? (
-        <div className="relative w-full overflow-hidden" style={{ height: '420px' }}>
-          {/* Background photo */}
-          <img src={bgPhoto} alt="virtual home" className="absolute inset-0 w-full h-full object-cover" />
-          {/* Overlay gradient at bottom */}
-          <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/30 to-transparent" />
-          {/* Walking avatar */}
-          <div
-            className="absolute bottom-0"
-            style={{
-              animation: 'walkAcross 8s linear infinite',
-              bottom: '8px',
-            }}
-          >
-            <AvatarWalker size={120} />
+        {/* Walking avatar — no box, fully transparent bg */}
+        <div className="relative h-28 overflow-hidden">
+          <div style={{ animation: 'walkAcross 8s linear infinite', position: 'absolute', bottom: 0 }}>
+            <AvatarWalker size={110} />
           </div>
-          {/* Camera button to change background */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="absolute top-3 right-3 bg-black/40 hover:bg-black/60 text-white rounded-full p-2 transition-colors backdrop-blur-sm"
-          >
-            <Camera className="h-4 w-4" />
+        </div>
+
+        {/* Profile info */}
+        <div className="relative flex flex-col items-center pb-4 px-4">
+          <div className="flex items-center gap-1.5">
+            <p className="font-bold text-lg">{myProfile?.display_name || 'My Name'}</p>
+            <Mail className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+          </div>
+          {myProfile?.bio && <p className="text-xs text-muted-foreground text-center mt-0.5 max-w-xs">{myProfile.bio}</p>}
+          <div className="flex gap-8 mt-3">
+            <div className="text-center"><p className="font-bold text-sm">{myProfile?.posts_count || 0}</p><p className="text-[11px] text-muted-foreground">Posts</p></div>
+            <div className="text-center"><p className="font-bold text-sm">{myProfile?.followers_count || 0}</p><p className="text-[11px] text-muted-foreground">Followers</p></div>
+            <div className="text-center"><p className="font-bold text-sm">{myProfile?.following_count || 0}</p><p className="text-[11px] text-muted-foreground">Following</p></div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4 Story-style tag pills */}
+      <div className="flex gap-4 px-4 py-3 overflow-x-auto border-b border-border">
+        {storyTags.map(tag => (
+          <button key={tag.id} className="flex flex-col items-center gap-1 shrink-0">
+            <div className="w-16 h-16 rounded-full border-2 border-purple-400 overflow-hidden flex items-center justify-center bg-muted">
+              {tag.type === 'image' ? (
+                <img src={tag.preview} className="w-full h-full object-cover" alt={tag.label} />
+              ) : (
+                <span className="text-2xl">{tag.emoji}</span>
+              )}
+            </div>
+            <span className="text-[11px] font-medium text-foreground">{tag.label}</span>
+            {tag.sublabel && <span className="text-[10px] text-muted-foreground -mt-0.5">{tag.sublabel}</span>}
           </button>
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleBgUpload} />
-        </div>
-      ) : tab === 'posts' ? (
-        <div className="grid grid-cols-3 gap-0.5">
-          {myPosts.map(post => (
-            <div key={post.id} className="aspect-square">
-              <img src={post.image_url || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300'}
-                   className="w-full h-full object-cover" alt="" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="p-4 space-y-5">
-          <div>
-            <h3 className="text-sm font-semibold mb-2">Custom Tags ({customTags.length}/{myProfile?.is_premium ? 5 : 3})</h3>
-            <div className="flex flex-wrap gap-2">
-              {customTags.length > 0 ? customTags.map(t => <LivingTagBadge key={t.id} tag={t} onClick={handleTagClick} />) :
-                <p className="text-xs text-muted-foreground">No custom tags yet</p>}
-            </div>
+        ))}
+        <button className="flex flex-col items-center gap-1 shrink-0">
+          <div className="w-16 h-16 rounded-full border-2 border-dashed border-border flex items-center justify-center bg-muted/50">
+            <Plus className="h-5 w-5 text-muted-foreground" />
           </div>
-          <div>
-            <h3 className="text-sm font-semibold mb-2">Official Tags</h3>
-            <div className="flex flex-wrap gap-2">
-              {officialTags.length > 0 ? officialTags.map(t => <LivingTagBadge key={t.id} tag={t} onClick={handleTagClick} />) :
-                <p className="text-xs text-muted-foreground">No official tags</p>}
-            </div>
+          <span className="text-[11px] text-muted-foreground">Add</span>
+        </button>
+      </div>
+
+      {/* Posts grid (Instagram style) */}
+      <div className="grid grid-cols-3 gap-0.5 mt-0.5">
+        {myPosts.length === 0 ? (
+          <div className="col-span-3 py-16 flex flex-col items-center text-muted-foreground gap-2">
+            <p className="text-sm">No posts yet</p>
           </div>
-        </div>
-      )}
+        ) : myPosts.map(post => (
+          <div key={post.id} className="aspect-square">
+            <img
+              src={post.image_url || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300'}
+              className="w-full h-full object-cover"
+              alt=""
+            />
+          </div>
+        ))}
+      </div>
+
       {/* Contact History Section */}
       <div className="px-4 py-3 border-t border-border">
         <div className="flex items-center justify-between mb-2">
@@ -153,11 +177,12 @@ export default function Profile() {
           <div className="space-y-2">
             {contactHistory.map(ev => {
               const icons = { sent_message: MessageCircle, visited_home: DoorOpen, followed: UserPlus, shared_post: Share2 };
-              const labels = { sent_message: 'Sent a message to', visited_home: "Visited\'s home", followed: 'Followed', shared_post: 'Shared a post with' };
               const EventIcon = icons[ev.event_type] || MessageCircle;
               const label = ev.event_type === 'visited_home'
                 ? `Visited ${ev.target_name}'s home`
-                : `${labels[ev.event_type] || ev.event_type} ${ev.target_name}`;
+                : ev.event_type === 'sent_message' ? `Sent a message to ${ev.target_name}`
+                : ev.event_type === 'followed' ? `Followed ${ev.target_name}`
+                : `Shared a post with ${ev.target_name}`;
               return (
                 <div key={ev.id} className="flex items-center gap-3 py-1.5">
                   <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0">
