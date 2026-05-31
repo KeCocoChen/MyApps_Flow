@@ -52,8 +52,8 @@ const AuthenticatedApp = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<Layout />}>
-          <Route path="/" element={<Feed />} />
-          <Route path="/contacts" element={<Contacts />} />
+          <Route path="/" element={<Contacts />} />
+          <Route path="/feed" element={<Feed />} />
           <Route path="/live" element={<LiveRooms />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
