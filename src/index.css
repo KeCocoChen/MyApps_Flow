@@ -81,8 +81,6 @@
   }
 }
 
-
-
 @keyframes walkAcross {
   0%   { transform: translateX(-140px) scaleX(1); }
   49%  { transform: translateX(calc(100vw + 20px)) scaleX(1); }

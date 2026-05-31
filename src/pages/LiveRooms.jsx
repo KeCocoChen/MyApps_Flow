@@ -32,7 +32,14 @@ export default function LiveRooms() {
       ) : (
         <div className="p-4 space-y-3">
           {activeRooms.map(room => (
-            <div key={room.id} className="bg-card border border-border rounded-2xl p-4 space-y-3 hover:shadow-sm transition-shadow">
+            <div key={room.id} className="relative bg-card border border-border rounded-2xl p-4 space-y-3 hover:shadow-sm transition-shadow overflow-hidden">
+              {(room.cover_image || room.host_avatar) && (
+                <img
+                  src={room.cover_image || room.host_avatar}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none"
+                />
+              )}
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-sm">{room.name}</h3>

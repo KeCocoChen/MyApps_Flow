@@ -98,7 +98,7 @@ export default function Profile() {
 
         {/* Walking avatar — no box, fully transparent bg */}
         <div className="relative h-28 overflow-hidden">
-          <div style={{ animation: 'walkAcross 8s linear infinite', position: 'absolute', bottom: 0 }}>
+          <div style={{ animation: 'walkAcross 22s linear infinite', position: 'absolute', bottom: 0 }}>
             <AvatarWalker size={110} />
           </div>
         </div>
@@ -116,6 +116,23 @@ export default function Profile() {
             <div className="text-center"><p className="font-bold text-sm">{myProfile?.following_count || 0}</p><p className="text-[11px] text-muted-foreground">Following</p></div>
           </div>
         </div>
+      </div>
+
+      {/* Posts grid (Instagram style) */}
+      <div className="grid grid-cols-3 gap-0.5 mt-0.5">
+        {myPosts.length === 0 ? (
+          <div className="col-span-3 py-16 flex flex-col items-center text-muted-foreground gap-2">
+            <p className="text-sm">No posts yet</p>
+          </div>
+        ) : myPosts.map(post => (
+          <div key={post.id} className="aspect-square">
+            <img
+              src={post.image_url || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300'}
+              className="w-full h-full object-cover"
+              alt=""
+            />
+          </div>
+        ))}
       </div>
 
       {/* 4 Story-style tag pills */}
@@ -139,23 +156,6 @@ export default function Profile() {
           </div>
           <span className="text-[11px] text-muted-foreground">Add</span>
         </button>
-      </div>
-
-      {/* Posts grid (Instagram style) */}
-      <div className="grid grid-cols-3 gap-0.5 mt-0.5">
-        {myPosts.length === 0 ? (
-          <div className="col-span-3 py-16 flex flex-col items-center text-muted-foreground gap-2">
-            <p className="text-sm">No posts yet</p>
-          </div>
-        ) : myPosts.map(post => (
-          <div key={post.id} className="aspect-square">
-            <img
-              src={post.image_url || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300'}
-              className="w-full h-full object-cover"
-              alt=""
-            />
-          </div>
-        ))}
       </div>
 
       {/* Contact History Section */}

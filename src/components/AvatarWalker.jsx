@@ -138,7 +138,7 @@ export default function AvatarWalker({ size = 120 }) {
     charGroup.add(rLeg);
 
     let t = 0;
-    const walkSpeed = 2.2;
+    const walkSpeed = 0.9;
     const animate = () => {
       const id = requestAnimationFrame(animate);
       renderer.domElement._animId = id;
