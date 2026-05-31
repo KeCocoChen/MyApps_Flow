@@ -2,13 +2,24 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProfileHeader from '../components/ProfileHeader';
 import LivingTagBadge from '../components/LivingTagBadge';
-import { Grid3X3, Tag, Home, History, Eye, EyeOff, MessageCircle, DoorOpen, UserPlus, Share2 } from 'lucide-react';
+import { Grid3X3, Tag, Home, History, Eye, EyeOff, MessageCircle, DoorOpen, UserPlus, Share2, Camera } from 'lucide-react';
+import AvatarWalker from '../components/AvatarWalker';
+import { useRef } from 'react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function Profile() {
   const [tab, setTab] = useState('virtual_home');
   const [historyVisible, setHistoryVisible] = useState(false);
+  const [bgPhoto, setBgPhoto] = useState('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900');
+  const fileInputRef = useRef(null);
+
+  const handleBgUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setBgPhoto(file_url);
+  };
 
   const { data: profiles = [] } = useQuery({
     queryKey: ['profiles'],
@@ -72,27 +83,29 @@ export default function Profile() {
       </div>
 
       {tab === 'virtual_home' ? (
-        <div className="p-4">
-          <div className="rounded-2xl bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border border-purple-100 overflow-hidden">
-            <div className="p-4 border-b border-purple-100">
-              <h3 className="font-semibold text-sm text-purple-800">✨ {myProfile?.display_name || 'My'}'s Virtual Home</h3>
-              <p className="text-xs text-purple-500 mt-0.5">Welcome to my personal space</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3 p-4">
-              {[{emoji:'🎨',label:'Art Studio'},{emoji:'🎵',label:'Music Room'},{emoji:'📚',label:'Library'},{emoji:'🌿',label:'Garden'}].map(r => (
-                <div key={r.label} className="bg-white/70 rounded-xl p-3 flex flex-col items-center gap-1.5 border border-white shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                  <span className="text-2xl">{r.emoji}</span>
-                  <span className="text-xs font-medium text-gray-600">{r.label}</span>
-                </div>
-              ))}
-            </div>
-            <div className="px-4 pb-4">
-              <div className="bg-white/70 rounded-xl p-3 border border-white">
-                <p className="text-xs font-medium text-gray-500 mb-1">🏡 Message Board</p>
-                <p className="text-sm text-gray-700 italic">"{myProfile?.bio || 'Welcome, make yourself at home!'}"</p>
-              </div>
-            </div>
+        <div className="relative w-full overflow-hidden" style={{ height: '420px' }}>
+          {/* Background photo */}
+          <img src={bgPhoto} alt="virtual home" className="absolute inset-0 w-full h-full object-cover" />
+          {/* Overlay gradient at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/30 to-transparent" />
+          {/* Walking avatar */}
+          <div
+            className="absolute bottom-0"
+            style={{
+              animation: 'walkAcross 8s linear infinite',
+              bottom: '8px',
+            }}
+          >
+            <AvatarWalker size={120} />
           </div>
+          {/* Camera button to change background */}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="absolute top-3 right-3 bg-black/40 hover:bg-black/60 text-white rounded-full p-2 transition-colors backdrop-blur-sm"
+          >
+            <Camera className="h-4 w-4" />
+          </button>
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleBgUpload} />
         </div>
       ) : tab === 'posts' ? (
         <div className="grid grid-cols-3 gap-0.5">

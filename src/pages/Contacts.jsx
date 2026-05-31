@@ -136,39 +136,32 @@ export default function Contacts() {
         </div>
       ) : (
         <div>
-          {sortedLetters.map(letter => (
-            <div key={letter}>
-              <div className="px-4 py-1.5 bg-muted/50">
-                <span className="text-xs font-semibold text-muted-foreground">{letter}</span>
-              </div>
-              {grouped[letter].map(profile => {
-                const userTags = (tagsByUser[profile.username] || []).slice(0, 3);
-                const isMutual = profile.is_mutual_follow;
-                return (
-                  <Link key={profile.id} to={`/user/${profile.username}`}
-                        className={`flex items-start gap-3 px-4 py-3 hover:bg-blue-50 transition-colors ${isMutual ? 'bg-blue-50' : ''}`}>
-                    <img src={profile.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80'}
-                         className="w-11 h-11 rounded-full object-cover shrink-0 mt-0.5" alt="" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <p className={`text-sm ${isMutual ? 'font-bold' : 'font-medium'}`}>{profile.display_name}</p>
-                        {profile.is_premium && (
-                          <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">PRO</span>
-                        )}
-                      </div>
-                      {userTags.length > 0 && (
-                        <div className="flex flex-wrap gap-1" onClick={e => e.preventDefault()}>
-                          {userTags.map(tag => (
-                            <LivingTagBadge key={tag.id} tag={tag} onClick={() => {}} />
-                          ))}
-                        </div>
-                      )}
+          {filtered.map(profile => {
+            const userTags = (tagsByUser[profile.username] || []).slice(0, 3);
+            const isMutual = profile.is_mutual_follow;
+            return (
+              <Link key={profile.id} to={`/user/${profile.username}`}
+                    className={`flex items-start gap-3 px-4 py-3 border-b border-border hover:bg-blue-50 transition-colors ${isMutual ? 'bg-blue-50' : ''}`}>
+                <img src={profile.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80'}
+                     className="w-11 h-11 rounded-full object-cover shrink-0 mt-0.5" alt="" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className={`text-sm ${isMutual ? 'font-bold' : 'font-medium'}`}>{profile.display_name}</p>
+                    {profile.is_premium && (
+                      <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">PRO</span>
+                    )}
+                  </div>
+                  {userTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1" onClick={e => e.preventDefault()}>
+                      {userTags.map(tag => (
+                        <LivingTagBadge key={tag.id} tag={tag} onClick={() => {}} />
+                      ))}
                     </div>
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
+                  )}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
