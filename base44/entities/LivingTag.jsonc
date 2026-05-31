@@ -1,0 +1,54 @@
+{
+  "name": "LivingTag",
+  "type": "object",
+  "properties": {
+    "profile_username": {
+      "type": "string"
+    },
+    "tag_type": {
+      "type": "string",
+      "enum": [
+        "custom",
+        "official"
+      ]
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "location",
+        "hobby",
+        "service",
+        "virtual_avatar",
+        "virtual_home",
+        "music",
+        "movie_reading"
+      ]
+    },
+    "label": {
+      "type": "string"
+    },
+    "value": {
+      "type": "string"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "location_discover",
+        "schedule_meeting",
+        "upload_resume",
+        "link",
+        "view",
+        "none"
+      ]
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "profile_username",
+    "label",
+    "category"
+  ]
+}

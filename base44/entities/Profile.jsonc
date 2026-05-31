@@ -1,0 +1,44 @@
+{
+  "name": "Profile",
+  "type": "object",
+  "properties": {
+    "display_name": {
+      "type": "string"
+    },
+    "username": {
+      "type": "string"
+    },
+    "bio": {
+      "type": "string"
+    },
+    "avatar_url": {
+      "type": "string"
+    },
+    "cover_image": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "is_premium": {
+      "type": "boolean",
+      "default": false
+    },
+    "followers_count": {
+      "type": "number",
+      "default": 0
+    },
+    "following_count": {
+      "type": "number",
+      "default": 0
+    },
+    "posts_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "display_name",
+    "username"
+  ]
+}
