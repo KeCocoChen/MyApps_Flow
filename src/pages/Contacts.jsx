@@ -90,22 +90,45 @@ export default function Contacts() {
         </div>
       )}
 
-      {/* Flow AI */}
-      <Link to="/chat/ai" className="flex items-center gap-3 px-4 py-3 border-b border-border hover:bg-muted/50 transition-colors">
-        <img src="https://media.base44.com/images/public/6a1c530c59bb7bc9748ddeb4/11b6c5f41_generated_image.png" className="w-12 h-12 rounded-full object-cover" alt="Flow" />
-        <div className="flex-1">
-          <p className="font-semibold text-sm">Flow</p>
-          <div className="flex gap-1.5 mt-1">
-            <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-              <CreditCard className="h-2.5 w-2.5" /> Pay to Upgrade
-            </span>
-            <span className="inline-flex items-center gap-1 bg-pink-50 text-pink-700 border border-pink-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-              <Heart className="h-2.5 w-2.5" /> Donate
-            </span>
+      {/* AI Contacts */}
+      {[
+        {
+          id: 'flow', name: 'Flow', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80',
+          tags: [
+            { label: 'Pay to Upgrade', bg: 'bg-amber-50 text-amber-700 border-amber-200', Icon: CreditCard },
+            { label: 'Donate', bg: 'bg-pink-50 text-pink-700 border-pink-200', Icon: Heart },
+          ], to: '/chat/ai'
+        },
+        {
+          id: 'chatgpt', name: 'ChatGPT', avatar: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=80',
+          tags: [], to: '/chat/ai'
+        },
+        {
+          id: 'meta', name: 'Meta AI', avatar: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=80',
+          tags: [], to: '/chat/ai'
+        },
+        {
+          id: 'claude', name: 'Claude', avatar: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=80',
+          tags: [], to: '/chat/ai'
+        },
+      ].map(ai => (
+        <Link key={ai.id} to={ai.to} className="flex items-center gap-3 px-4 py-3 border-b border-border hover:bg-muted/50 transition-colors">
+          <img src={ai.avatar} className="w-12 h-12 rounded-full object-cover" alt={ai.name} />
+          <div className="flex-1">
+            <p className="font-semibold text-sm">{ai.name}</p>
+            {ai.tags.length > 0 && (
+              <div className="flex gap-1.5 mt-1">
+                {ai.tags.map(tag => (
+                  <span key={tag.label} className={`inline-flex items-center gap-1 border text-[10px] font-semibold px-2 py-0.5 rounded-full ${tag.bg}`}>
+                    <tag.Icon className="h-2.5 w-2.5" /> {tag.label}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-      </Link>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </Link>
+      ))}
 
       {isLoading ? (
         <div className="flex justify-center py-12">
@@ -133,7 +156,6 @@ export default function Contacts() {
                           <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">PRO</span>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground mb-1.5">@{profile.username}</p>
                       {userTags.length > 0 && (
                         <div className="flex flex-wrap gap-1" onClick={e => e.preventDefault()}>
                           {userTags.map(tag => (
