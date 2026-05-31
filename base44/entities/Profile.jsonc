@@ -50,6 +50,21 @@
         "tiktok"
       ],
       "default": "standard"
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "personal",
+        "enterprise"
+      ],
+      "default": "personal"
+    },
+    "is_mutual_follow": {
+      "type": "boolean",
+      "default": false
+    },
+    "last_contacted": {
+      "type": "string"
     }
   },
   "required": [
