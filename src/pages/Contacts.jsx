@@ -1,10 +1,25 @@
 import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Search, ChevronRight, ChevronDown, Building2, CreditCard, Heart } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import LivingTagBadge from '../components/LivingTagBadge';
+
+const AI_BOTS = [
+  {
+    id: 'flow', display_name: 'Flow', username: 'flow_ai',
+    avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80',
+    isAI: true, to: '/chat/ai',
+    tags: [
+      { label: 'Pay to Upgrade', bg: 'bg-amber-50 text-amber-700 border-amber-200', Icon: CreditCard },
+      { label: 'Donate', bg: 'bg-pink-50 text-pink-700 border-pink-200', Icon: Heart },
+    ],
+  },
+  { id: 'chatgpt', display_name: 'ChatGPT', username: 'chatgpt', avatar_url: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=80', isAI: true, to: '/chat/ai', tags: [] },
+  { id: 'meta', display_name: 'Meta AI', username: 'meta_ai', avatar_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=80', isAI: true, to: '/chat/ai', tags: [] },
+  { id: 'claude', display_name: 'Claude', username: 'claude_ai', avatar_url: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=80', isAI: true, to: '/chat/ai', tags: [] },
+];
 
 export default function Contacts() {
   const [search, setSearch] = useState('');
@@ -37,18 +52,18 @@ export default function Contacts() {
   const personalProfiles = sorted.filter(p => p.account_type !== 'enterprise');
   const enterpriseProfiles = sorted.filter(p => p.account_type === 'enterprise');
 
-  const filtered = personalProfiles.filter(p =>
-    p.display_name?.toLowerCase().includes(search.toLowerCase()) ||
-    p.username?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const grouped = filtered.reduce((acc, p) => {
-    const letter = (p.display_name || '?')[0].toUpperCase();
-    if (!acc[letter]) acc[letter] = [];
-    acc[letter].push(p);
-    return acc;
-  }, {});
-  const sortedLetters = Object.keys(grouped).sort();
+  const blendedContacts = useMemo(() => {
+    const filtered = personalProfiles.filter(p =>
+      p.display_name?.toLowerCase().includes(search.toLowerCase()) ||
+      p.username?.toLowerCase().includes(search.toLowerCase())
+    );
+    const result = [...filtered];
+    AI_BOTS.forEach((bot, i) => {
+      const pos = Math.min(i * 3 + 1, result.length);
+      result.splice(pos, 0, bot);
+    });
+    return result;
+  }, [personalProfiles, search]);
 
   return (
     <div className="bg-background min-h-screen">
@@ -90,53 +105,38 @@ export default function Contacts() {
         </div>
       )}
 
-      {/* AI Contacts */}
-      {[
-        {
-          id: 'flow', name: 'Flow', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80',
-          tags: [
-            { label: 'Pay to Upgrade', bg: 'bg-amber-50 text-amber-700 border-amber-200', Icon: CreditCard },
-            { label: 'Donate', bg: 'bg-pink-50 text-pink-700 border-pink-200', Icon: Heart },
-          ], to: '/chat/ai'
-        },
-        {
-          id: 'chatgpt', name: 'ChatGPT', avatar: 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=80',
-          tags: [], to: '/chat/ai'
-        },
-        {
-          id: 'meta', name: 'Meta AI', avatar: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=80',
-          tags: [], to: '/chat/ai'
-        },
-        {
-          id: 'claude', name: 'Claude', avatar: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=80',
-          tags: [], to: '/chat/ai'
-        },
-      ].map(ai => (
-        <Link key={ai.id} to={ai.to} className="flex items-center gap-3 px-4 py-3 border-b border-border hover:bg-muted/50 transition-colors">
-          <img src={ai.avatar} className="w-12 h-12 rounded-full object-cover" alt={ai.name} />
-          <div className="flex-1">
-            <p className="font-semibold text-sm">{ai.name}</p>
-            {ai.tags.length > 0 && (
-              <div className="flex gap-1.5 mt-1">
-                {ai.tags.map(tag => (
-                  <span key={tag.label} className={`inline-flex items-center gap-1 border text-[10px] font-semibold px-2 py-0.5 rounded-full ${tag.bg}`}>
-                    <tag.Icon className="h-2.5 w-2.5" /> {tag.label}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-        </Link>
-      ))}
-
       {isLoading ? (
         <div className="flex justify-center py-12">
           <div className="w-6 h-6 border-2 border-muted border-t-foreground rounded-full animate-spin" />
         </div>
       ) : (
         <div>
-          {filtered.map(profile => {
+          {blendedContacts.map(profile => {
+            if (profile.isAI) {
+              return (
+                <Link key={profile.id} to={profile.to}
+                      className="flex items-center gap-3 px-4 py-3 border-b border-border hover:bg-muted/50 transition-colors">
+                  <img src={profile.avatar_url} className="w-11 h-11 rounded-full object-cover shrink-0" alt={profile.display_name} />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-semibold text-sm">{profile.display_name}</p>
+                      <span className="bg-blue-100 text-blue-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full">AI</span>
+                    </div>
+                    {profile.tags?.length > 0 && (
+                      <div className="flex gap-1.5 mt-1">
+                        {profile.tags.map(tag => (
+                          <span key={tag.label} className={`inline-flex items-center gap-1 border text-[10px] font-semibold px-2 py-0.5 rounded-full ${tag.bg}`}>
+                            <tag.Icon className="h-2.5 w-2.5" /> {tag.label}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Link>
+              );
+            }
+
             const userTags = (tagsByUser[profile.username] || []).slice(0, 3);
             const isMutual = profile.is_mutual_follow;
             return (

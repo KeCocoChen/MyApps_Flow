@@ -139,7 +139,7 @@ export default function Profile() {
       <div className="flex gap-4 px-4 py-3 overflow-x-auto border-b border-border">
         {storyTags.map(tag => (
           <button key={tag.id} className="flex flex-col items-center gap-1 shrink-0">
-            <div className="w-16 h-16 rounded-full border-2 border-purple-400 overflow-hidden flex items-center justify-center bg-muted" style={{ borderRadius: '9999px' }}>
+            <div className="w-16 h-16 border-2 border-purple-400 flex items-center justify-center bg-muted" style={{ borderRadius: '9999px', overflow: 'hidden', transform: 'translateZ(0)' }}>
               {tag.type === 'image' ? (
                 <img src={tag.preview} className="w-full h-full object-cover" alt={tag.label} />
               ) : (
