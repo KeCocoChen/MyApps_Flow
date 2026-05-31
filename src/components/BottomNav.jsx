@@ -1,10 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, Mic, User, Settings } from 'lucide-react';
+import { Users, Home, Waves, User, Settings } from 'lucide-react';
 
 const tabs = [
   { path: '/contacts', icon: Users, label: 'Contacts' },
-  { path: '/', icon: Home, label: 'Feed' },
-  { path: '/live', icon: Mic, label: 'Live' },
+  { path: '/', icon: Waves, label: 'Flow' },
+  { path: '/live', icon: Home, label: 'Talk' },
   { path: '/profile', icon: User, label: 'Me' },
   { path: '/settings', icon: Settings, label: 'Settings' },
 ];
