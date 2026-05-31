@@ -2,8 +2,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { Home, Users, Mic, User, Settings } from 'lucide-react';
 
 const tabs = [
-  { path: '/', icon: Home, label: 'Feed' },
   { path: '/contacts', icon: Users, label: 'Contacts' },
+  { path: '/', icon: Home, label: 'Feed' },
   { path: '/live', icon: Mic, label: 'Live' },
   { path: '/profile', icon: User, label: 'Me' },
   { path: '/settings', icon: Settings, label: 'Settings' },

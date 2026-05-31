@@ -35,6 +35,21 @@
     "posts_count": {
       "type": "number",
       "default": 0
+    },
+    "mbti": {
+      "type": "string"
+    },
+    "mbti_completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "feed_mode": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "tiktok"
+      ],
+      "default": "standard"
     }
   },
   "required": [
