@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Mail } from 'lucide-react';
 import Avatar3D from './Avatar3D';
 
 export default function ProfileHeader({ profile, isOwn, onFollow }) {
@@ -12,7 +13,10 @@ export default function ProfileHeader({ profile, isOwn, onFollow }) {
           )}
         </div>
         <div className="mt-2 text-center">
-          <p className="font-semibold text-base">{profile?.display_name}</p>
+          <div className="flex items-center gap-1.5 justify-center">
+            <p className="font-semibold text-base">{profile?.display_name}</p>
+            <Mail className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+          </div>
           <p className="text-xs text-muted-foreground">@{profile?.username}</p>
           {profile?.bio && <p className="text-sm mt-1 leading-relaxed">{profile.bio}</p>}
         </div>

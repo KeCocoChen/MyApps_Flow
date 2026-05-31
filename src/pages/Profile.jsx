@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProfileHeader from '../components/ProfileHeader';
 import LivingTagBadge from '../components/LivingTagBadge';
-import { Grid3X3, Tag, Home } from 'lucide-react';
+import { Grid3X3, Tag, Home, History, Eye, EyeOff, MessageCircle, DoorOpen, UserPlus, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function Profile() {
   const [tab, setTab] = useState('virtual_home');
+  const [historyVisible, setHistoryVisible] = useState(false);
 
   const { data: profiles = [] } = useQuery({
     queryKey: ['profiles'],
@@ -17,6 +18,11 @@ export default function Profile() {
   const { data: posts = [] } = useQuery({
     queryKey: ['posts'],
     queryFn: () => base44.entities.Post.list('-created_date'),
+  });
+
+  const { data: contactHistory = [] } = useQuery({
+    queryKey: ['contact-history'],
+    queryFn: () => base44.entities.ContactHistory.list('-event_date', 20),
   });
 
   const { data: allTags = [] } = useQuery({
@@ -115,6 +121,46 @@ export default function Profile() {
           </div>
         </div>
       )}
+      {/* Contact History Section */}
+      <div className="px-4 py-3 border-t border-border">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <History className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-semibold">Contact History</span>
+          </div>
+          <button
+            onClick={() => setHistoryVisible(!historyVisible)}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors border border-border rounded-full px-2.5 py-1">
+            {historyVisible ? <><Eye className="h-3 w-3" /> Visible to others</> : <><EyeOff className="h-3 w-3" /> Hidden from others</>}
+          </button>
+        </div>
+        {contactHistory.length === 0 ? (
+          <p className="text-xs text-muted-foreground py-2">No contact history yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {contactHistory.map(ev => {
+              const icons = { sent_message: MessageCircle, visited_home: DoorOpen, followed: UserPlus, shared_post: Share2 };
+              const labels = { sent_message: 'Sent a message to', visited_home: "Visited\'s home", followed: 'Followed', shared_post: 'Shared a post with' };
+              const EventIcon = icons[ev.event_type] || MessageCircle;
+              const label = ev.event_type === 'visited_home'
+                ? `Visited ${ev.target_name}'s home`
+                : `${labels[ev.event_type] || ev.event_type} ${ev.target_name}`;
+              return (
+                <div key={ev.id} className="flex items-center gap-3 py-1.5">
+                  <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0">
+                    <EventIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-foreground">{label}</p>
+                    {ev.note && <p className="text-[11px] text-muted-foreground">{ev.note}</p>}
+                  </div>
+                  <span className="text-[11px] text-muted-foreground whitespace-nowrap">{new Date(ev.event_date).toLocaleDateString()}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

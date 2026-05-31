@@ -1,0 +1,40 @@
+{
+  "name": "ContactHistory",
+  "type": "object",
+  "properties": {
+    "owner_username": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "sent_message",
+        "visited_home",
+        "followed",
+        "shared_post"
+      ]
+    },
+    "target_name": {
+      "type": "string"
+    },
+    "target_username": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    },
+    "event_date": {
+      "type": "string"
+    },
+    "is_visible_to_others": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "owner_username",
+    "event_type",
+    "target_name",
+    "event_date"
+  ]
+}
