@@ -1,17 +1,47 @@
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import ProfileHeader from '../components/ProfileHeader';
-import LivingTagBadge from '../components/LivingTagBadge';
-import { History, Eye, EyeOff, MessageCircle, DoorOpen, UserPlus, Share2, Camera, Mail, Plus } from 'lucide-react';
+import { History, Eye, EyeOff, List, MessageCircle, DoorOpen, UserPlus, Share2, Camera, Mail } from 'lucide-react';
 import AvatarWalker from '../components/AvatarWalker';
-import { useRef } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+// Fallback placeholder images so the grid always looks full
+const PLACEHOLDER_PHOTOS = [
+  'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300',
+  'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=300',
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300',
+  'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=300',
+  'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=300',
+  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300',
+  'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=300',
+  'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=300',
+  'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=300',
+];
+
+// 3 modes: 'actions' → 'detailed' → 'hidden'
+const HISTORY_MODES = [
+  { key: 'actions',   label: 'Actions only',    Icon: List   },
+  { key: 'detailed',  label: 'Detailed',         Icon: Eye    },
+  { key: 'hidden',    label: 'Hidden',           Icon: EyeOff },
+];
+
+const EVENT_ICONS = { sent_message: MessageCircle, visited_home: DoorOpen, followed: UserPlus, shared_post: Share2 };
+
+function eventLabel(ev) {
+  if (ev.event_type === 'visited_home') return `Visited ${ev.target_name}'s home`;
+  if (ev.event_type === 'sent_message') return `Sent a message to ${ev.target_name}`;
+  if (ev.event_type === 'followed') return `Followed ${ev.target_name}`;
+  return `Shared a post with ${ev.target_name}`;
+}
+
 export default function Profile() {
-  const [historyVisible, setHistoryVisible] = useState(false);
+  const [historyModeIdx, setHistoryModeIdx] = useState(0);
   const [bgPhoto, setBgPhoto] = useState('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900');
   const fileInputRef = useRef(null);
+
+  const historyMode = HISTORY_MODES[historyModeIdx];
+
+  const cycleHistoryMode = () => setHistoryModeIdx(i => (i + 1) % HISTORY_MODES.length);
 
   const handleBgUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -35,59 +65,26 @@ export default function Profile() {
     queryFn: () => base44.entities.ContactHistory.list('-event_date', 20),
   });
 
-  const { data: allTags = [] } = useQuery({
-    queryKey: ['living-tags'],
-    queryFn: () => base44.entities.LivingTag.list(),
-  });
-
   const myProfile = profiles[0];
-  const myPosts = posts.slice(0, 9);
-  const myTags = allTags.filter(t => t.profile_username === myProfile?.username);
+
+  // Ensure at least 9 photos for the grid
+  const rawPosts = posts.slice(0, 9);
+  const gridPhotos = Array.from({ length: 9 }, (_, i) =>
+    rawPosts[i]?.image_url || PLACEHOLDER_PHOTOS[i]
+  );
 
   const storyTags = [
-    {
-      id: 'virtual_home',
-      label: 'Home',
-      preview: bgPhoto,
-      type: 'image',
-    },
-    {
-      id: 'music',
-      label: 'Music',
-      emoji: '🎵',
-      sublabel: 'Blinding Lights',
-    },
-    {
-      id: 'movie',
-      label: 'Movie',
-      emoji: '🎬',
-      sublabel: 'Interstellar',
-    },
-    {
-      id: 'custom',
-      label: 'Gaming',
-      emoji: '🎮',
-      sublabel: 'Valorant',
-    },
+    { id: 'virtual_home', label: 'Home',   preview: bgPhoto, type: 'image' },
+    { id: 'music',        label: 'Music',  emoji: '🎵', sublabel: 'Blinding Lights' },
+    { id: 'movie',        label: 'Movie',  emoji: '🎬', sublabel: 'Interstellar' },
+    { id: 'custom',       label: 'Gaming', emoji: '🎮', sublabel: 'Valorant' },
   ];
-
-  const handleTagClick = (tag) => {
-    if (tag.action_type === 'location_discover') toast.info(`Discovering people in ${tag.value || tag.label}`);
-    else if (tag.action_type === 'schedule_meeting') toast.info('Opening scheduling...');
-    else toast.info(`${tag.label}: ${tag.value || 'Tap to explore'}`);
-  };
 
   return (
     <div className="bg-background min-h-screen">
-      {/* Header with transparent home background */}
+      {/* Header */}
       <div className="relative overflow-hidden">
-        {/* Very transparent home bg */}
-        <img
-          src={bgPhoto}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none"
-        />
-        {/* Camera button */}
+        <img src={bgPhoto} alt="" className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none" />
         <button
           onClick={() => fileInputRef.current?.click()}
           className="absolute top-3 right-3 z-10 bg-black/20 hover:bg-black/40 text-white rounded-full p-1.5 transition-colors"
@@ -96,14 +93,12 @@ export default function Profile() {
         </button>
         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleBgUpload} />
 
-        {/* Walking avatar — no box, fully transparent bg */}
         <div className="relative h-28 overflow-hidden">
           <div style={{ animation: 'walkAcross 22s linear infinite', position: 'absolute', bottom: 0 }}>
             <AvatarWalker size={110} />
           </div>
         </div>
 
-        {/* Profile info */}
         <div className="relative flex flex-col items-center pb-4 px-4">
           <div className="flex items-center gap-1.5">
             <p className="font-bold text-lg">{myProfile?.display_name || 'My Name'}</p>
@@ -116,23 +111,6 @@ export default function Profile() {
             <div className="text-center"><p className="font-bold text-sm">{myProfile?.following_count || 0}</p><p className="text-[11px] text-muted-foreground">Following</p></div>
           </div>
         </div>
-      </div>
-
-      {/* Posts grid (Instagram style) */}
-      <div className="grid grid-cols-3 gap-0.5 mt-0.5">
-        {myPosts.length === 0 ? (
-          <div className="col-span-3 py-16 flex flex-col items-center text-muted-foreground gap-2">
-            <p className="text-sm">No posts yet</p>
-          </div>
-        ) : myPosts.map(post => (
-          <div key={post.id} className="aspect-square">
-            <img
-              src={post.image_url || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300'}
-              className="w-full h-full object-cover"
-              alt=""
-            />
-          </div>
-        ))}
       </div>
 
       {/* 2x2 story tag grid */}
@@ -155,46 +133,58 @@ export default function Profile() {
         ))}
       </div>
 
-      {/* Contact History Section */}
-      <div className="px-4 py-3 border-t border-border">
+      {/* Contact History */}
+      <div className="px-4 py-3 border-b border-border">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <History className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-semibold">Contact History</span>
           </div>
           <button
-            onClick={() => setHistoryVisible(!historyVisible)}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors border border-border rounded-full px-2.5 py-1">
-            {historyVisible ? <><Eye className="h-3 w-3" /> Visible to others</> : <><EyeOff className="h-3 w-3" /> Hidden from others</>}
+            onClick={cycleHistoryMode}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors border border-border rounded-full px-2.5 py-1"
+          >
+            <historyMode.Icon className="h-3 w-3" />
+            {historyMode.label}
           </button>
         </div>
-        {contactHistory.length === 0 ? (
-          <p className="text-xs text-muted-foreground py-2">No contact history yet.</p>
+
+        {historyMode.key === 'hidden' ? (
+          <p className="text-xs text-muted-foreground py-1">History is hidden from others.</p>
+        ) : contactHistory.length === 0 ? (
+          <p className="text-xs text-muted-foreground py-1">No contact history yet.</p>
         ) : (
           <div className="space-y-2">
             {contactHistory.map(ev => {
-              const icons = { sent_message: MessageCircle, visited_home: DoorOpen, followed: UserPlus, shared_post: Share2 };
-              const EventIcon = icons[ev.event_type] || MessageCircle;
-              const label = ev.event_type === 'visited_home'
-                ? `Visited ${ev.target_name}'s home`
-                : ev.event_type === 'sent_message' ? `Sent a message to ${ev.target_name}`
-                : ev.event_type === 'followed' ? `Followed ${ev.target_name}`
-                : `Shared a post with ${ev.target_name}`;
+              const EventIcon = EVENT_ICONS[ev.event_type] || MessageCircle;
               return (
                 <div key={ev.id} className="flex items-center gap-3 py-1.5">
                   <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0">
                     <EventIcon className="h-3.5 w-3.5 text-muted-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-foreground">{label}</p>
-                    {ev.note && <p className="text-[11px] text-muted-foreground">{ev.note}</p>}
+                    <p className="text-xs text-foreground">{eventLabel(ev)}</p>
+                    {historyMode.key === 'detailed' && ev.note && (
+                      <p className="text-[11px] text-muted-foreground mt-0.5 italic">"{ev.note}"</p>
+                    )}
                   </div>
-                  <span className="text-[11px] text-muted-foreground whitespace-nowrap">{new Date(ev.event_date).toLocaleDateString()}</span>
+                  <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                    {new Date(ev.event_date).toLocaleDateString()}
+                  </span>
                 </div>
               );
             })}
           </div>
         )}
+      </div>
+
+      {/* Posts grid — always 9 photos */}
+      <div className="grid grid-cols-3 gap-0.5 mt-0.5">
+        {gridPhotos.map((src, i) => (
+          <div key={i} className="aspect-square">
+            <img src={src} className="w-full h-full object-cover" alt="" />
+          </div>
+        ))}
       </div>
     </div>
   );
