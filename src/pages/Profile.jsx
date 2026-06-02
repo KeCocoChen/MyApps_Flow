@@ -135,27 +135,24 @@ export default function Profile() {
         ))}
       </div>
 
-      {/* 4 Story-style tag pills */}
-      <div className="flex gap-4 px-4 py-3 overflow-x-auto border-b border-border">
+      {/* 2x2 story tag grid */}
+      <div className="grid grid-cols-2 gap-1 px-1 py-1 border-b border-border">
         {storyTags.map(tag => (
-          <button key={tag.id} className="flex flex-col items-center gap-1 shrink-0">
-            <div className="w-16 h-16 border-2 border-purple-400 flex items-center justify-center bg-muted" style={{ borderRadius: '9999px', overflow: 'hidden', transform: 'translateZ(0)' }}>
-              {tag.type === 'image' ? (
-                <img src={tag.preview} className="w-full h-full object-cover" alt={tag.label} />
-              ) : (
-                <span className="text-2xl">{tag.emoji}</span>
-              )}
+          <button key={tag.id} className="relative aspect-square overflow-hidden rounded-xl bg-muted">
+            {tag.type === 'image' ? (
+              <img src={tag.preview} className="w-full h-full object-cover" alt={tag.label} />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <span className="text-4xl">{tag.emoji}</span>
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-2">
+              <span className="text-white text-xs font-semibold drop-shadow">{tag.label}</span>
+              {tag.sublabel && <p className="text-white/80 text-[10px] leading-tight">{tag.sublabel}</p>}
             </div>
-            <span className="text-[11px] font-medium text-foreground">{tag.label}</span>
-            {tag.sublabel && <span className="text-[10px] text-muted-foreground -mt-0.5">{tag.sublabel}</span>}
           </button>
         ))}
-        <button className="flex flex-col items-center gap-1 shrink-0">
-          <div className="w-16 h-16 rounded-full border-2 border-dashed border-border flex items-center justify-center bg-muted/50">
-            <Plus className="h-5 w-5 text-muted-foreground" />
-          </div>
-          <span className="text-[11px] text-muted-foreground">Add</span>
-        </button>
       </div>
 
       {/* Contact History Section */}
